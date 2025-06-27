@@ -1,0 +1,9 @@
+[package]
+org = "choreo"
+name = "authenticator.mtls"
+version = "1.0.0"
+distribution = "2201.5.5"
+keywords=["choreo-apim-mediation-policy", "choreo-apim-mediation-request-flow"]
+
+[build-options]
+observabilityIncluded = true
