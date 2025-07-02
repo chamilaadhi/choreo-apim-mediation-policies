@@ -25,16 +25,18 @@ import ballerina/file;
 
 const CERTIFICATE_HEADER = "x-client-cert-x509";
 json AUTHENTICATION_FALIURE_MESSAGE = {
-        "error_message": "Invalid Credentials",
-        "code":"900901",
-        "error_description": "Make sure you have provided the correct security credentials."
-    };
+    "error_message": "Invalid Credentials",
+    "code": "900901",
+    "error_description": "Make sure you have provided the correct security credentials."
+};
 
 @mediation:RequestFlow
-public function addHeader_In(mediation:Context ctx, http:Request req, string Certificate\ Content, boolean Optional = false)
+public function addHeader_In(mediation:Context ctx, http:Request req, string Certificate\ Content\ part1, string Certificate\ Content\ part2, boolean Optional = false)
                                                                 returns http:Response|false|error|() {
 
-    string savedCertString = Certificate\ Content;
+    string savedCertStringJoind = Certificate\ Content\ part1 + Certificate\ Content\ part2;
+    string savedCertString = check url:decode(savedCertStringJoind, "UTF-8");
+    io:println(savedCertString);
 
     string|http:HeaderNotFoundError incomingCertString = req.getHeader(CERTIFICATE_HEADER);
 
@@ -62,7 +64,7 @@ function getCertificate(string certificateString) returns error|crypto:Certifica
     string tempfile = "/tmp/" + randomInteger.toString() + "_temp-cert.crt";
     io:Error? result = io:fileWriteString(tempfile, certificateString);
     if (result is error) {
-        log:printError("Error writing to file '" + tempfile + "': " , result);
+        log:printError("Error writing to file '" + tempfile + "': ", result);
     } else {
         log:printDebug("Successfully wrote string to '" + tempfile + "'");
         crypto:PublicKey incomingPublicKey = check crypto:decodeRsaPublicKeyFromCertFile(tempfile);

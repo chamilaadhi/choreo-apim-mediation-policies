@@ -317,19 +317,8 @@ modules = [
 
 [[package]]
 org = "choreo"
-name = "mediation"
-version = "1.0.1"
-dependencies = [
-	{org = "ballerina", name = "regex"}
-]
-modules = [
-	{org = "choreo", packageName = "mediation", moduleName = "mediation"}
-]
-
-[[package]]
-org = "wso2testorg1"
 name = "authenticator.mtls"
-version = "1.0.1"
+version = "1.0.0"
 dependencies = [
 	{org = "ballerina", name = "crypto"},
 	{org = "ballerina", name = "file"},
@@ -342,6 +331,17 @@ dependencies = [
 	{org = "choreo", name = "mediation"}
 ]
 modules = [
-	{org = "wso2testorg1", packageName = "authenticator.mtls", moduleName = "authenticator.mtls"}
+	{org = "choreo", packageName = "authenticator.mtls", moduleName = "authenticator.mtls"}
+]
+
+[[package]]
+org = "choreo"
+name = "mediation"
+version = "1.0.1"
+dependencies = [
+	{org = "ballerina", name = "regex"}
+]
+modules = [
+	{org = "choreo", packageName = "mediation", moduleName = "mediation"}
 ]
 
