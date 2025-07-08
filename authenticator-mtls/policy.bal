@@ -35,17 +35,19 @@ map<crypto:Certificate?> requestCertsMap = {};
 map<crypto:Certificate?> savedCertsMap = {};
 
 @mediation:RequestFlow
-public function addHeader_In(mediation:Context ctx, http:Request req, string Certificate\ Content\ part1, string Certificate\ Content\ part2, boolean Optional = false)
+public function addHeader_In(mediation:Context ctx, http:Request req, string Certificate\ Content, boolean Optional = false)
                                                                 returns http:Response|false|error|() {
 
-    string savedCertStringJoind = Certificate\ Content\ part1 + Certificate\ Content\ part2;
-    string savedCertString = check url:decode(savedCertStringJoind, "UTF-8");
-    io:println(savedCertString);
+    string savedCertString = check url:decode(Certificate\ Content, "UTF-8");
 
     string|http:HeaderNotFoundError incomingCertString = req.getHeader(CERTIFICATE_HEADER);
-
+  
     if (incomingCertString is http:HeaderNotFoundError) {
         log:printDebug("MTLS Header not found");
+        if (!Optional) {
+            log:printDebug("MTLS Header is optional, returning without error.");
+            return ();
+        }
         return generateResponse(AUTHENTICATION_FALIURE_MESSAGE, http:STATUS_UNAUTHORIZED);
     } else {
         crypto:Certificate? incomingCert;
@@ -71,7 +73,6 @@ public function addHeader_In(mediation:Context ctx, http:Request req, string Cer
             savedCertsMap[savedCertString] = savedCert;
             log:printDebug("Saved certificate not found in the map, parsing and adding to the map: " + savedCertString);
         }
-        
 
         if (incomingCert is crypto:Certificate && savedCert is crypto:Certificate &&
         incomingCert.signature == savedCert.signature) {
