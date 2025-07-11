@@ -44,7 +44,7 @@ public function addHeader_In(mediation:Context ctx, http:Request req, string Cer
   
     if (incomingCertString is http:HeaderNotFoundError) {
         log:printDebug("MTLS Header not found");
-        if (!Optional) {
+        if (Optional) {
             log:printDebug("MTLS Header is optional, returning without error.");
             return ();
         }
