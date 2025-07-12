@@ -7,3 +7,6 @@ keywords=["choreo-apim-mediation-policy", "choreo-apim-mediation-request-flow"]
 
 [build-options]
 observabilityIncluded = true
+
+[[platform.java11.dependency]]
+path = "libs/certificate-validator.jar"

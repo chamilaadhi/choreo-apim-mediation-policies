@@ -12,3 +12,10 @@ This will be available to select when attaching mediation policies to a proxy in
 
 
 
+## Build java component
+
+Generate .class files 
+
+```
+
+```

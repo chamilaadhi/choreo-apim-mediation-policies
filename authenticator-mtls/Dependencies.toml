@@ -46,9 +46,6 @@ dependencies = [
 	{org = "ballerina", name = "jballerina.java"},
 	{org = "ballerina", name = "time"}
 ]
-modules = [
-	{org = "ballerina", packageName = "crypto", moduleName = "crypto"}
-]
 
 [[package]]
 org = "ballerina"
@@ -59,9 +56,6 @@ dependencies = [
 	{org = "ballerina", name = "jballerina.java"},
 	{org = "ballerina", name = "os"},
 	{org = "ballerina", name = "time"}
-]
-modules = [
-	{org = "ballerina", packageName = "file", moduleName = "file"}
 ]
 
 [[package]]
@@ -103,14 +97,14 @@ dependencies = [
 	{org = "ballerina", name = "jballerina.java"},
 	{org = "ballerina", name = "lang.value"}
 ]
-modules = [
-	{org = "ballerina", packageName = "io", moduleName = "io"}
-]
 
 [[package]]
 org = "ballerina"
 name = "jballerina.java"
 version = "0.0.0"
+modules = [
+	{org = "ballerina", packageName = "jballerina.java", moduleName = "jballerina.java"}
+]
 
 [[package]]
 org = "ballerina"
@@ -256,18 +250,6 @@ dependencies = [
 
 [[package]]
 org = "ballerina"
-name = "random"
-version = "1.3.1"
-dependencies = [
-	{org = "ballerina", name = "jballerina.java"},
-	{org = "ballerina", name = "time"}
-]
-modules = [
-	{org = "ballerina", packageName = "random", moduleName = "random"}
-]
-
-[[package]]
-org = "ballerina"
 name = "regex"
 version = "1.3.2"
 dependencies = [
@@ -290,9 +272,6 @@ name = "time"
 version = "2.2.5"
 dependencies = [
 	{org = "ballerina", name = "jballerina.java"}
-]
-modules = [
-	{org = "ballerina", packageName = "time", moduleName = "time"}
 ]
 
 [[package]]
@@ -323,19 +302,18 @@ org = "choreo"
 name = "authenticator.mtls"
 version = "1.0.0"
 dependencies = [
-	{org = "ballerina", name = "crypto"},
-	{org = "ballerina", name = "file"},
 	{org = "ballerina", name = "http"},
-	{org = "ballerina", name = "io"},
+	{org = "ballerina", name = "jballerina.java"},
 	{org = "ballerina", name = "log"},
-	{org = "ballerina", name = "random"},
-	{org = "ballerina", name = "time"},
 	{org = "ballerina", name = "url"},
 	{org = "ballerinai", name = "observe"},
 	{org = "choreo", name = "mediation"}
 ]
 modules = [
-	{org = "choreo", packageName = "authenticator.mtls", moduleName = "authenticator.mtls"}
+	{org = "choreo", packageName = "authenticator.mtls", moduleName = "authenticator.mtls"},
+	{org = "choreo", packageName = "authenticator.mtls", moduleName = "authenticator.mtls.com.wso2.choreo.am.mediation.certificates"},
+	{org = "choreo", packageName = "authenticator.mtls", moduleName = "authenticator.mtls.java.lang"},
+	{org = "choreo", packageName = "authenticator.mtls", moduleName = "authenticator.mtls.java.security.cert"}
 ]
 
 [[package]]

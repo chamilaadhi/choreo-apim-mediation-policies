@@ -16,13 +16,10 @@
 
 import choreo/mediation;
 import ballerina/http;
-import ballerina/io;
 import ballerina/url;
-import ballerina/crypto;
-import ballerina/random;
 import ballerina/log;
-import ballerina/file;
-import ballerina/time;
+
+import authenticator.mtls.com.wso2.choreo.am.mediation.certificates as certificates;
 
 const CERTIFICATE_HEADER = "x-client-cert-x509";
 json AUTHENTICATION_FALIURE_MESSAGE = {
@@ -31,15 +28,11 @@ json AUTHENTICATION_FALIURE_MESSAGE = {
     "error_description": "Make sure you have provided the correct security credentials."
 };
 
-map<crypto:Certificate?> requestCertsMap = {};
-map<crypto:Certificate?> savedCertsMap = {};
-
 @mediation:RequestFlow
 public function addHeader_In(mediation:Context ctx, http:Request req, string Certificate\ Content, boolean Optional = false)
                                                                 returns http:Response|false|error|() {
 
     string savedCertString = check url:decode(Certificate\ Content, "UTF-8");
-
     string|http:HeaderNotFoundError incomingCertString = req.getHeader(CERTIFICATE_HEADER);
   
     if (incomingCertString is http:HeaderNotFoundError) {
@@ -49,66 +42,16 @@ public function addHeader_In(mediation:Context ctx, http:Request req, string Cer
             return ();
         }
         return generateResponse(AUTHENTICATION_FALIURE_MESSAGE, http:STATUS_UNAUTHORIZED);
-    } else {
-        crypto:Certificate? incomingCert;
-        if requestCertsMap.hasKey(incomingCertString) {
-            incomingCert = requestCertsMap[incomingCertString];
-            log:printDebug("Incoming certificate found in the map: " + incomingCertString);
+    } else {        
+        string clientCertString = check url:decode(incomingCertString, "UTF-8");
+        certificates:ValidationResponse resp = certificates:CertificateValidator_verifyCertificates(savedCertString, clientCertString);
+        if (resp.isVerify()) {
+            return ();           
         } else {
-            // If the certificate is not in the map, we need to parse it
-            string urlDecodedincomingCert = check url:decode(incomingCertString, "UTF-8");
-            incomingCert = check getCertificate(urlDecodedincomingCert);
-            // add to map for future use
-            requestCertsMap[incomingCertString] = incomingCert; 
-            log:printDebug("Incoming certificate not found in the map, parsing and adding to the map: " + incomingCertString);
-        }
-        crypto:Certificate? savedCert;
-        if savedCertsMap.hasKey(savedCertString) {
-            savedCert = savedCertsMap[savedCertString];
-            log:printDebug("Saved certificate found in the map: " + savedCertString);
-        } else {
-            // If the certificate is not in the map, we need to parse it
-            savedCert = check getCertificate(savedCertString);
-            // and store it for future use.
-            savedCertsMap[savedCertString] = savedCert;
-            log:printDebug("Saved certificate not found in the map, parsing and adding to the map: " + savedCertString);
-        }
-
-        if (incomingCert is crypto:Certificate && savedCert is crypto:Certificate &&
-        incomingCert.signature == savedCert.signature) {
-            log:printDebug("Client certificate matches the saved certificate.");
-            // validate expires and notBefore dates
-            time:Utc current = time:utcNow();
-            if (time:utcDiffSeconds(current, incomingCert.notBefore) < 0d) || 
-                    (time:utcDiffSeconds(current, incomingCert.notAfter) > 0d) {
-                log:printDebug("Client certificate has expired or is not valid yet.");
-                // remove expired certificate from the map
-                _ = requestCertsMap.remove(incomingCertString);
-                _ = savedCertsMap.remove(savedCertString);
-                return generateResponse(AUTHENTICATION_FALIURE_MESSAGE, http:STATUS_UNAUTHORIZED);
-            }
-        } else {
-            log:printDebug("Client certificate does not match the saved certificate.");
+            log:printDebug("Client certificate does not match the saved certificate. " + resp.getMessage());
             return generateResponse(AUTHENTICATION_FALIURE_MESSAGE, http:STATUS_UNAUTHORIZED);
         }
     }
-    return ();
-}
-
-function getCertificate(string certificateString) returns error|crypto:Certificate? {
-    int randomInteger = check random:createIntInRange(1, 100000);
-    string tempfile = "/tmp/" + randomInteger.toString() + "_temp-cert.crt";
-    io:Error? result = io:fileWriteString(tempfile, certificateString);
-    if (result is error) {
-        log:printError("Error writing to file '" + tempfile + "': ", result);
-    } else {
-        log:printDebug("Successfully wrote string to '" + tempfile + "'");
-        crypto:PublicKey incomingPublicKey = check crypto:decodeRsaPublicKeyFromCertFile(tempfile);
-        check file:remove(tempfile);
-        crypto:Certificate? incomingCert = incomingPublicKey.certificate;
-        return incomingCert;
-    }
-    return;
 }
 
 function generateResponse(json payload, int statusCode) returns http:Response {
@@ -117,3 +60,5 @@ function generateResponse(json payload, int statusCode) returns http:Response {
     response.statusCode = statusCode;
     return response;
 }
+
+
